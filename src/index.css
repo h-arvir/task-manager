@@ -1,68 +1,275 @@
+/* =========================
+   Neon Retro Theme — Centered & Creative
+   ========================= */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --bg-0: #070912;
+  --bg-1: #0b1020;
+  --bg-2: #111632;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --text-strong: #e3f2ff;
+  --text-dim: #a9b6d3;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --neon-pink: #ff4dff;
+  --neon-cyan: #00eaff;
+  --neon-purple: #7a5cff;
+  --neon-yellow: #f9f871;
+  --neon-green: #39ff14;
+
+  --card-bg: rgba(10, 16, 36, 0.6);
+  --border: rgba(255, 255, 255, 0.12);
+  --shadow: 0 0 24px rgba(0, 238, 255, 0.15), 0 0 48px rgba(255, 77, 255, 0.08);
+
+  --radius: 14px;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  display: flex;
+  color: var(--text-strong);
+  background: radial-gradient(1200px 800px at 20% 10%, #10204a 0%, transparent 60%),
+              radial-gradient(1000px 600px at 80% 90%, #1a0a2a 0%, transparent 60%),
+              linear-gradient(180deg, var(--bg-0), var(--bg-1));
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+
+  /* Center the app vertically and horizontally */
+  display: grid;
   place-items: center;
-  min-width: 320px;
   min-height: 100vh;
+  padding: 32px;
 }
 
-h1 {
-  font-size: 3.2em;
+/* Subtle neon grid overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient( to right, rgba(0, 234, 255, 0.06) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient( to bottom, rgba(255, 77, 255, 0.05) 1px, transparent 1px) 0 0 / 22px 22px;
+  mask: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.6), transparent 70%);
+}
+
+/* Soft scanlines for retro vibe */
+body::after {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.02),
+    rgba(255,255,255,0.02) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+}
+
+/* App shell centered */
+.app-shell {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Inner content width controller */
+.content {
+  width: 100%;
+  max-width: 740px;
+  margin: 0 auto;
+}
+
+/* Animated gradient neon title */
+.neon-title {
+  font-family: "Orbitron", system-ui, sans-serif;
+  letter-spacing: 1px;
+  font-size: 3rem;
   line-height: 1.1;
+  margin: 0 0 6px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple), var(--neon-yellow), var(--neon-cyan));
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hueShift 8s linear infinite;
+  text-align: center;
+  text-shadow:
+    0 0 10px rgba(0, 234, 255, 0.35),
+    0 0 22px rgba(255, 77, 255, 0.2),
+    0 0 44px rgba(122, 92, 255, 0.12);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+@keyframes hueShift { to { background-position: 300% center; } }
+
+.subtle-text { color: var(--text-dim); }
+
+.neon-card {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+
+.card-pad { padding: 20px; }
+
+/* A decorative divider */
+.neon-divider {
+  height: 1px;
+  width: 100%;
+  margin: 10px 0 14px;
+  background: linear-gradient(90deg, transparent, rgba(0,234,255,0.6), rgba(255,77,255,0.6), transparent);
+  box-shadow: 0 0 12px rgba(0, 234, 255, 0.2), 0 0 18px rgba(255, 77, 255, 0.12);
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.toolbar.center { justify-content: center; flex-direction: column; gap: 8px; text-align: center; }
+
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Buttons */
+.neon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 234, 255, 0.35);
+  color: #001318;
+  background: linear-gradient(180deg, #00eaff, #00b9d1);
+  text-shadow: none;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  box-shadow: 0 0 12px rgba(0, 234, 255, 0.35), inset 0 0 0 rgba(0,0,0,0);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.neon-btn:hover { transform: translateY(-1px); filter: brightness(1.04); box-shadow: 0 0 16px rgba(0, 234, 255, 0.55); }
+.neon-btn:active { transform: translateY(0); filter: brightness(0.98); }
+.neon-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.neon-btn.pink {
+  border-color: rgba(255, 77, 255, 0.35);
+  background: linear-gradient(180deg, var(--neon-pink), #d83ad8);
+  color: #1a0020;
+  box-shadow: 0 0 12px rgba(255, 77, 255, 0.35);
 }
+
+.neon-btn.ghost {
+  color: var(--text-strong);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+/* Inputs */
+.neon-input, .neon-input input { width: 100%; }
+
+.neon-input, input[type="text"], input[type="email"], input[type="password"] {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-strong);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.neon-input::placeholder, input::placeholder { color: rgba(200, 214, 255, 0.4); }
+
+.neon-input:focus, input:focus {
+  border-color: rgba(0, 234, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(0, 234, 255, 0.12);
+}
+
+/* Forms */
+.form-row { display: grid; gap: 10px; margin-bottom: 12px; }
+.label { font-size: 12px; color: var(--text-dim); }
+
+/* Auth layout centered */
+.auth { display: grid; gap: 12px; justify-items: center; }
+.auth form { width: 100%; max-width: 420px; margin: 0 auto; }
+
+/* Task list */
+.tasks-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+}
+
+.task-row .task-title { flex: 1; }
+
+/* Checkbox (custom) */
+.neon-checkbox {
+  appearance: none;
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 234, 255, 0.45);
+  background: rgba(255,255,255,0.02);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+  cursor: pointer;
+  position: relative;
+  transition: box-shadow 140ms ease, background 140ms ease, filter 140ms ease;
+}
+.neon-checkbox:hover { filter: brightness(1.15); }
+.neon-checkbox:checked {
+  background: linear-gradient(180deg, var(--neon-cyan), #00b9d1);
+  box-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
+}
+.neon-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  top: 3px; left: 6px;
+  width: 6px; height: 12px;
+  border: solid #00252c;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Helper text */
+.error-text { color: #ff6fcf; text-shadow: 0 0 8px rgba(255, 111, 207, 0.35); text-align: center; }
+.loading-text { color: #7ef9ff; text-shadow: 0 0 8px rgba(126, 249, 255, 0.28); text-align: center; }
+
+/* Auth card spacing */
+.auth-card { margin: 8px 0 10px; }
+
+/* Utility */
+.row { display: flex; gap: 10px; }
+.row.center { justify-content: center; }
+.spacer { height: 12px; }
+
+/* Links */
+a { color: var(--neon-cyan); text-decoration: none; }
+a:hover { color: #a1ffff; }

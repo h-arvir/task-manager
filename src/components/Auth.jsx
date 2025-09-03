@@ -30,32 +30,26 @@ export default function Auth({ onAuthed }) {
 
   return (
     <div className="auth">
-      <h2>{mode === "login" ? "Login" : "Sign Up"}</h2>
+      <h2 className="subtle-text" style={{ marginTop: 0 }}>{mode === "login" ? "Login" : "Sign Up"}</h2>
       <form onSubmit={submit}>
-        <div>
-          <label>Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+        <div className="form-row">
+          <label className="label">Email</label>
+          <input className="neon-input" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
         </div>
-        <div>
-          <label>Password</label>
-          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
+        <div className="form-row">
+          <label className="label">Password</label>
+          <input className="neon-input" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
         </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit" disabled={loading}>
-          {loading ? "Please wait..." : mode === "login" ? "Login" : "Create Account"}
-        </button>
+        {error && <p className="error-text">{error}</p>}
+        <div className="row" style={{ marginTop: 10 }}>
+          <button className="neon-btn pink" type="submit" disabled={loading}>
+            {loading ? "Please wait..." : mode === "login" ? "Login" : "Create Account"}
+          </button>
+          <button className="neon-btn ghost" type="button" onClick={() => setMode(mode === "login" ? "signup" : "login")}> 
+            {mode === "login" ? "Need an account?" : "Have an account?"}
+          </button>
+        </div>
       </form>
-      <p>
-        {mode === "login" ? (
-          <>
-            No account? <button onClick={() => setMode("signup")}>Sign up</button>
-          </>
-        ) : (
-          <>
-            Have an account? <button onClick={() => setMode("login")}>Login</button>
-          </>
-        )}
-      </p>
     </div>
   );
 }

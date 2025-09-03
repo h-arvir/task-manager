@@ -6,13 +6,18 @@ import TaskList from "./components/TaskList.jsx";
 function App() {
   const [user, setUser] = useState(null);
   return (
-    <div style={{ maxWidth: 640, margin: "0 auto", padding: 16 }}>
-      <h1>Task Manager</h1>
-      {user ? (
-        <TaskList user={user} onLogout={() => setUser(null)} />
-      ) : (
-        <Auth onAuthed={setUser} />
-      )}
+    <div className="app-shell">
+      <h1 className="neon-title">NEON TASK MANAGER</h1>
+      <div className="neon-divider" />
+      <div className="content">
+        {user ? (
+          <TaskList user={user} onLogout={() => setUser(null)} />
+        ) : (
+          <div className="neon-card card-pad auth-card">
+            <Auth onAuthed={setUser} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

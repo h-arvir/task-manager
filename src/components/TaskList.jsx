@@ -21,9 +21,7 @@ export default function TaskList({ user, onLogout }) {
     }
   };
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const addTask = async (e) => {
     e.preventDefault();
@@ -83,37 +81,39 @@ export default function TaskList({ user, onLogout }) {
   };
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2>Tasks</h2>
-        <div>
+    <div className="neon-card card-pad">
+      <div className="toolbar center">
+        <h2 style={{ margin: 0, textAlign: "center" }}>Tasks</h2>
+        <div className="user-pill" style={{ justifyContent: "center" }}>
+          <span className="subtle-text" style={{ fontSize: 12 }}>Signed in</span>
           <span>{user.email}</span>
-          <button onClick={logout} style={{ marginLeft: 8 }}>Logout</button>
+          <button className="neon-btn ghost" onClick={logout}>Logout</button>
         </div>
       </div>
 
-      <form onSubmit={addTask} style={{ marginBottom: 16 }}>
+      <form onSubmit={addTask} className="row center" style={{ marginBottom: 12 }}>
         <input
+          className="neon-input"
           placeholder="New task title"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
         />
-        <button type="submit">Add</button>
+        <button className="neon-btn" type="submit">Add</button>
       </form>
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <p className="loading-text">Loading...</p>}
+      {error && <p className="error-text">{error}</p>}
 
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <ul className="tasks-list">
         {tasks.map((t) => (
-          <li key={t.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-            <input type="checkbox" checked={t.completed} onChange={() => toggle(t)} />
+          <li key={t.id} className="task-row">
+            <input className="neon-checkbox" type="checkbox" checked={t.completed} onChange={() => toggle(t)} />
             <input
+              className="neon-input task-title"
               value={t.title}
               onChange={(e) => updateTitle(t, e.target.value)}
-              style={{ flex: 1 }}
             />
-            <button onClick={() => remove(t)}>Delete</button>
+            <button className="neon-btn ghost" onClick={() => remove(t)}>Delete</button>
           </li>
         ))}
       </ul>
