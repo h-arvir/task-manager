@@ -2,71 +2,51 @@ import { sql, ensureSchema } from "../_lib/db.js";
 import { getAuthUser, parseJsonBody, withCors } from "../_lib/http.js";
 
 export default async function handler(req, res) {
-  if (withCors(req, res)) return; // Handle preflight
+  if (withCors(req, res)) return;
+
   try {
     await ensureSchema();
     const user = getAuthUser(req);
-    if (!user) {
-      res.statusCode = 401;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ error: "Unauthorized" }));
-      return;
-    }
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
 
-    const id = parseInt(req.query?.id || (req.url?.split("/").pop() ?? ""), 10);
-    if (!Number.isFinite(id)) {
-      res.statusCode = 400;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ error: "Invalid id" }));
-      return;
+    const { id } = req.query;  // ✅ simpler and reliable
+    const taskId = parseInt(id, 10);
+    if (!Number.isFinite(taskId)) {
+      return res.status(400).json({ error: "Invalid id" });
     }
 
     if (req.method === "PUT") {
       const body = await parseJsonBody(req);
       const { title, completed } = body || {};
-      const current = await sql`SELECT id FROM tasks WHERE id = ${id} AND user_id = ${user.id}`;
-      if (!current.rows.length) {
-        res.statusCode = 404;
-        res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ error: "Task not found" }));
-        return;
-      }
 
       const update = await sql`
         UPDATE tasks
-        SET title = COALESCE(${title}, title),
-            completed = COALESCE(${completed}, completed),
-            updated_at = now()
-        WHERE id = ${id} AND user_id = ${user.id}
+        SET 
+          title = COALESCE(${title}, title),
+          completed = COALESCE(${completed}, completed),
+          updated_at = now()
+        WHERE id = ${taskId} AND user_id = ${user.id}
         RETURNING id, title, completed, created_at, updated_at
       `;
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(update.rows[0]));
-      return;
+
+      if (!update.rows.length) return res.status(404).json({ error: "Task not found" });
+      return res.status(200).json(update.rows[0]);
     }
 
     if (req.method === "DELETE") {
-      const del = await sql`DELETE FROM tasks WHERE id = ${id} AND user_id = ${user.id} RETURNING id`;
-      if (!del.rows.length) {
-        res.statusCode = 404;
-        res.setHeader("Content-Type", "application/json");
-        res.end(JSON.stringify({ error: "Task not found" }));
-        return;
-      }
-      res.statusCode = 200;
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ ok: true, id: del.rows[0].id }));
-      return;
+      const del = await sql`
+        DELETE FROM tasks
+        WHERE id = ${taskId} AND user_id = ${user.id}
+        RETURNING id, title
+      `;
+      if (!del.rows.length) return res.status(404).json({ error: "Task not found" });
+      return res.status(200).json({ success: true, task: del.rows[0] });
     }
 
-    res.statusCode = 405;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "Method not allowed" }));
+    res.setHeader("Allow", ["PUT", "DELETE"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (err) {
-    console.error(err);
-    res.statusCode = 500;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "Internal server error" }));
+    console.error("Task API error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 }

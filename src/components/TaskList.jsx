@@ -5,6 +5,7 @@ export default function TaskList({ user, onLogout }) {
   const [newTitle, setNewTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState("all"); // "all", "pending", "completed"
 
   const load = async () => {
     setLoading(true);
@@ -43,15 +44,51 @@ export default function TaskList({ user, onLogout }) {
   };
 
   const toggle = async (task) => {
-    const res = await fetch(`/api/tasks/${task.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ completed: !task.completed }),
-    });
-    const data = await res.json();
-    if (!res.ok) return setError(data.error || "Failed to update");
-    setTasks((list) => list.map((t) => (t.id === task.id ? data : t)));
+    try {
+      setError(""); // Clear any previous errors
+      
+      // First update the UI optimistically
+      setTasks((list) =>
+        list.map((t) =>
+          t.id === task.id ? { ...t, completed: !t.completed } : t
+        )
+      );
+
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ completed: !task.completed }),
+      });
+      
+      // Read the response text first
+      const text = await res.text();
+      
+      // Try to parse as JSON
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        console.error('Invalid JSON response:', text);
+        throw new Error("Server returned invalid JSON response");
+      }
+      
+      if (!res.ok) {
+        // Revert the optimistic update
+        setTasks((list) =>
+          list.map((t) =>
+            t.id === task.id ? task : t
+          )
+        );
+        throw new Error(data.error || "Failed to update task");
+      }
+      
+      // Update with the server response data
+      setTasks((list) => list.map((t) => (t.id === task.id ? data : t)));
+    } catch (err) {
+      console.error("Error toggling task:", err);
+      setError(err.message || "Failed to update task status");
+    }
   };
 
   const updateTitle = async (task, title) => {
@@ -106,19 +143,61 @@ export default function TaskList({ user, onLogout }) {
         <button className="neon-btn" type="submit">Add</button>
       </form>
 
+      <div className="filter-controls" style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', gap: '8px' }}>
+        <button 
+          className={`neon-btn ${filter === 'all' ? '' : 'ghost'}`}
+          onClick={() => setFilter('all')}
+        >
+          All
+        </button>
+        <button 
+          className={`neon-btn ${filter === 'pending' ? '' : 'ghost'}`}
+          onClick={() => setFilter('pending')}
+        >
+          Pending
+        </button>
+        <button 
+          className={`neon-btn ${filter === 'completed' ? '' : 'ghost'}`}
+          onClick={() => setFilter('completed')}
+        >
+          Completed
+        </button>
+      </div>
+
       {loading && <p className="loading-text">Loading...</p>}
       {error && <p className="error-text">{error}</p>}
 
       <ul className="tasks-list">
-        {tasks.map((t) => (
+        {tasks
+          .filter(t => {
+            if (filter === 'pending') return !t.completed;
+            if (filter === 'completed') return t.completed;
+            return true;
+          })
+          .map((t) => (
           <li key={t.id} className="task-row">
-            <input className="neon-checkbox" type="checkbox" checked={t.completed} onChange={() => toggle(t)} />
+            <input 
+              className="neon-checkbox" 
+              type="checkbox" 
+              checked={t.completed} 
+              onChange={() => toggle(t)} 
+              aria-label={t.completed ? "Mark as incomplete" : "Mark as complete"}
+            />
             <input
-              className="neon-input task-title"
+              className={`neon-input task-title ${t.completed ? 'completed' : ''}`}
               value={t.title}
               onChange={(e) => updateTitle(t, e.target.value)}
+              style={t.completed ? { textDecoration: 'line-through', opacity: 0.7 } : {}}
             />
-            <button className="neon-btn ghost" onClick={() => remove(t)}>Delete</button>
+            <div className="task-actions">
+              <button 
+                className={`neon-btn ${t.completed ? 'warning' : 'success'} ghost`} 
+                onClick={() => toggle(t)}
+              >
+                {t.completed ? 'Mark Incomplete' : 'Mark Complete'}
+              </button>
+              <button className="neon-btn ghost danger" onClick={() => remove(t)}>Delete</button>
+            </div>
           </li>
         ))}
       </ul>

@@ -7,7 +7,7 @@ function App() {
   const [user, setUser] = useState(null);
   return (
     <div className="app-shell">
-      <h1 className="neon-title">NEON TASK MANAGER</h1>
+      <h1 className="neon-title">TASK MANAGER</h1>
       <div className="neon-divider" />
       <div className="content">
         {user ? (
