@@ -47,10 +47,16 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "DELETE") {
-      await sql`DELETE FROM tasks WHERE id = ${id} AND user_id = ${user.id}`;
+      const del = await sql`DELETE FROM tasks WHERE id = ${id} AND user_id = ${user.id} RETURNING id`;
+      if (!del.rows.length) {
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ error: "Task not found" }));
+        return;
+      }
       res.statusCode = 200;
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ ok: true }));
+      res.end(JSON.stringify({ ok: true, id: del.rows[0].id }));
       return;
     }
 

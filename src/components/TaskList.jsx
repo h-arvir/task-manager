@@ -67,12 +67,17 @@ export default function TaskList({ user, onLogout }) {
   };
 
   const remove = async (task) => {
-    const res = await fetch(`/api/tasks/${task.id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-    if (!res.ok) return setError("Failed to delete");
-    setTasks((list) => list.filter((t) => t.id !== task.id));
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Failed to delete");
+      setTasks((list) => list.filter((t) => t.id !== task.id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const logout = async () => {
